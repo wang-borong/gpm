@@ -49,13 +49,13 @@ func DownloadLatestRelease(owner, repo, oldVersion string) (pkg string, err erro
     number, err := strconv.Atoi(input)
 
     appreAsset := release.Assets[number]
+    pkgName := filepath.Join("/tmp", *appreAsset.Name)
     fmt.Println("Downloading", *appreAsset.Name)
     resp, _, err := client.Repositories.DownloadReleaseAsset(ctx, owner, repo, *appreAsset.ID, http.DefaultClient)
     if err != nil {
         return "", err
     }
 
-    pkgName := filepath.Join("/tmp/*appreAsset.Name")
     if resp != nil {
         //Create a empty file
         file, err := os.Create(pkgName)
