@@ -1,0 +1,12 @@
+# Put this file to your home dir
+# Format:
+# [command in your local]:[github user/repo]
+
+fd:sharkdp/fd
+bat:sharkdp/bat
+hexyl:sharkdp/hexyl
+/usr/local/bin/nvim:neovim/neovim
+rg:BurntSushi/ripgrep
+delta:dandavison/delta
+#kovidgoyal/kitty
+/home/wbr/.local/bin/tokei:XAMPPRocky/tokei

@@ -34,7 +34,6 @@ func DownloadInstall(ghpath string) {
 }
 
 func main() {
-
     if len(os.Args) < 2 {
         home := os.Getenv("HOME")
         pkgListFile := filepath.Join(home, ".packages")
@@ -46,7 +45,7 @@ func main() {
 
         scanner := bufio.NewScanner(file)
         for scanner.Scan() {
-            if scanner.Text()[0] == '#' {
+            if scanner.Text() == "" || scanner.Text()[0] == '#' {
                 continue
             }
             DownloadInstall(scanner.Text())
@@ -60,5 +59,4 @@ func main() {
             DownloadInstall(ghpath)
         }
     }
-
 }
