@@ -18,7 +18,9 @@ func DownloadInstall(ghpath string) {
 
     oldVersion, err := exec.Command(pkgcmd, "--version").Output()
     if err != nil {
-        log.Fatal(err)
+        fmt.Println(err)
+        // just download it
+        oldVersion = []byte("0.0.0")
     }
 
     pkg, err:= ghinstaller.DownloadLatestRelease(owner_repo[0], owner_repo[1], string(oldVersion[:]))
