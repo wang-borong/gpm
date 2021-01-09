@@ -8,30 +8,51 @@ import (
     "strings"
     "os/exec"
     "path/filepath"
-    "wbr.com/gpm/lib"
+    "github.com/wbrn/gpm/lib"
 )
 
 
-func DownloadInstall(ghpath string) {
-    pkgcmd := strings.Split(ghpath, ":")[0]
-    owner_repo := strings.Split(strings.Split(ghpath, ":")[1], "/")
+func DownloadInstall(pkginfo string) {
+    pkgCmd := strings.Split(pkginfo, "%")[0]
+    pkgGhPath := strings.Split(pkginfo, "%")[1]
+    pkgInsCmds := strings.Split(pkginfo, "%")[2]
 
-    oldVersion, err := exec.Command(pkgcmd, "--version").Output()
-    if err != nil {
-        fmt.Println(err)
-        // just download it
-        oldVersion = []byte("0.0.0")
-    }
+    // if github owner and repo is none
+    if pkgGhPath == "none" {
+        fmt.Printf("runing %s ...", pkgInsCmds)
+        gpm.ShellRun(pkgInsCmds)
+    } else {
+        ownerRepo := strings.Split(pkgGhPath, "/")
 
-    pkg, err:= ghinstaller.DownloadLatestRelease(owner_repo[0], owner_repo[1], string(oldVersion[:]))
-    if err != nil {
-        fmt.Println(err)
-        os.Exit(87)
-    }
-    err = ghinstaller.Install("dpkg", "-i", pkg)
-    if err != nil {
-        fmt.Println(err)
-        os.Exit(87)
+        oldVersion, err := exec.Command(pkgCmd, "--version").Output()
+        if err != nil {
+            fmt.Println(err)
+            // just download it
+            oldVersion = []byte("0.0.0")
+        }
+
+        pkgPath, err := gpm.DownloadLatestRelease(ownerRepo[0], ownerRepo[1], string(oldVersion[:]))
+        if err != nil {
+            fmt.Println(err)
+            return
+        }
+        if pkgPath == "" {
+            return
+        }
+
+        if pkgInsCmds == "deb" {
+            err = gpm.InstallDeb(pkgPath)
+            if err != nil {
+                fmt.Println(err)
+                return
+            }
+        } else {
+            err = gpm.InstallOthPkg(pkgInsCmds, pkgPath)
+            if err != nil {
+                fmt.Println(err)
+                return
+            }
+        }
     }
 }
 
@@ -57,8 +78,8 @@ func main() {
             log.Fatal(err)
         }
     } else {
-        for _, ghpath := range os.Args[1:] {
-            DownloadInstall(ghpath)
+        for _, pkginfo := range os.Args[1:] {
+            DownloadInstall(pkginfo)
         }
     }
 }

@@ -1,4 +1,4 @@
-module wbr.com/gpm
+module github.com/wbrn/gpm
 
 go 1.15
 

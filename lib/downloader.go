@@ -1,4 +1,4 @@
-package ghinstaller
+package gpm
 
 import (
     "fmt"
@@ -66,9 +66,9 @@ func DownloadLatestTag(owner, repo, oldVersion string) error {
     latestTagURL := *latestTag.TarballURL
 
     fileName := repo + "-" + filepath.Base(latestTagURL) + ".tar.gz"
-    pkgName := filepath.Join("/tmp", fileName)
+    pkgPath := filepath.Join("/tmp", fileName)
 
-    err = DownloadFile(pkgName, latestTagURL)
+    err = DownloadFile(pkgPath, latestTagURL)
     if err != nil {
         return err
     }
@@ -105,7 +105,12 @@ func DownloadLatestRelease(owner, repo, oldVersion string) (pkg string, err erro
     number, err := strconv.Atoi(input)
 
     appreAsset := release.Assets[number]
-    pkgName := filepath.Join("/tmp", *appreAsset.Name)
+    pkgPath := filepath.Join("/tmp", *appreAsset.Name)
+
+    if _, err := os.Stat(pkgPath); err == nil {
+        return pkgPath, nil
+    }
+
     fmt.Println("Downloading", *appreAsset.Name)
     resp, _, err := client.Repositories.DownloadReleaseAsset(ctx, owner, repo, *appreAsset.ID, http.DefaultClient)
     if err != nil {
@@ -114,7 +119,7 @@ func DownloadLatestRelease(owner, repo, oldVersion string) (pkg string, err erro
 
     if resp != nil {
         //Create a empty file
-        file, err := os.Create(pkgName)
+        file, err := os.Create(pkgPath)
         if err != nil {
             return "", err
         }
@@ -128,5 +133,5 @@ func DownloadLatestRelease(owner, repo, oldVersion string) (pkg string, err erro
         defer resp.Close()
     }
 
-    return pkgName, nil
+    return pkgPath, nil
 }

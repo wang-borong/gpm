@@ -1,12 +1,16 @@
 # Put this file to your home dir
-# Format:
-# [command in your local]:[github user/repo]
+# Format%
+# [command in your local]%[github user/repo]%[commands used to install program]
+# If github usr/repo is none, gpm will just run the installing commands 
+# deb is the default installing method
+# $PROG will be replaced to the downloaded package name
 
-fd:sharkdp/fd
-bat:sharkdp/bat
-hexyl:sharkdp/hexyl
-/usr/local/bin/nvim:neovim/neovim
-rg:BurntSushi/ripgrep
-delta:dandavison/delta
-#kovidgoyal/kitty
-/home/wbr/.local/bin/tokei:XAMPPRocky/tokei
+fd%sharkdp/fd%deb
+bat%sharkdp/bat%deb
+hexyl%sharkdp/hexyl%deb
+rg%BurntSushi/ripgrep%deb
+delta%dandavison/delta%deb
+/usr/local/bin/topgrade%r-darwish/topgrade%sudo tar xf $PROG -C /usr/local/bin
+/usr/local/bin/tokei%XAMPPRocky/tokei%sudo tar xf $PROG -C /usr/local/bin
+/opt/nvim/bin/nvim%neovim/neovim%rm -rf /opt/nvim && tar xf $PROG && sudo mv nvim-linux64 /opt/nvim
+/home/wbr/.local/kitty.app/bin/kitty%none%curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
