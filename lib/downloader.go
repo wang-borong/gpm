@@ -15,8 +15,8 @@ import (
 
 // DownloadFile will download a url to a local file. It's efficient because it will
 // write as it downloads and not load the whole file into memory.
-func DownloadFile(filepath string, url string) error {
-
+func DownloadFile(pkgPath string, url string) error {
+    fmt.Printf("downloading %s ...", filepath.Base(pkgPath))
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {
@@ -25,7 +25,7 @@ func DownloadFile(filepath string, url string) error {
 	defer resp.Body.Close()
 
 	// Create the file
-	out, err := os.Create(filepath)
+	out, err := os.Create(pkgPath)
 	if err != nil {
 		return err
 	}
@@ -37,9 +37,10 @@ func DownloadFile(filepath string, url string) error {
 }
 
 func CheckVersion(ghVersion, oldVersion string) bool {
-    ghVerStr := strings.Replace(ghVersion, "v", "", -1)
-    re := regexp.MustCompile(`\d{1,2}\.\d{1,2}\.\d{1,2}`)
+    //ghVerStr := strings.Replace(ghVersion, "v", "", -1)
+    re := regexp.MustCompile(`\d{1,2}\.\d{1,2}(\.\d{1,2})?`)
     oldVerStr := re.FindString(oldVersion)
+    ghVerStr := re.FindString(ghVersion)
 
     if ghVerStr > oldVerStr {
         fmt.Printf("github version %s > local %s\n", ghVerStr, oldVerStr)

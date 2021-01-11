@@ -12,5 +12,8 @@ rg%BurntSushi/ripgrep%deb
 delta%dandavison/delta%deb
 /usr/local/bin/topgrade%r-darwish/topgrade%sudo tar xf $PROG -C /usr/local/bin
 /usr/local/bin/tokei%XAMPPRocky/tokei%sudo tar xf $PROG -C /usr/local/bin
-/opt/nvim/bin/nvim%neovim/neovim%rm -rf /opt/nvim && tar xf $PROG && sudo mv nvim-linux64 /opt/nvim
+/usr/local/bin/sk%lotabout/skim%sudo tar xf $PROG -C /usr/local/bin
+/opt/nvim/bin/nvim%neovim/neovim%sudo rm -rf /opt/nvim && tar xf $PROG && sudo mv nvim-linux64 /opt/nvim
 /home/wbr/.local/kitty.app/bin/kitty%none%curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+#git%git/git%tar xf $PROC && cd git-* && autoreconf -fvi && ./configure --prefix=/usr/local && sudo checkinstall -D --fstrans=no --pkgname=git-checkinstall make -j8 install
+#zsh%zsh-users/zsh%tar xf $PROC && cd zsh-* && autoreconf -fvi && ./confiure --prefix=/usr/local && sudo checkinstall -D --fstrans=no --pkgname=zsh-checkinstall make -j8 install
