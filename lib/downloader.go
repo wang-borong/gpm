@@ -105,6 +105,10 @@ func DownloadLatestRelease(owner, repo, oldVersion string) (pkg string, err erro
     fmt.Scanln(&input)
     number, err := strconv.Atoi(input)
 
+    if err != nil {
+        return "", err
+    }
+
     appreAsset := release.Assets[number]
     pkgPath := filepath.Join("/tmp", *appreAsset.Name)
 
