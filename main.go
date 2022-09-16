@@ -6,6 +6,7 @@ import (
     "log"
     "bufio"
     "strings"
+    "regexp"
     "os/exec"
     "path/filepath"
     "github.com/wbrn/gpm/lib"
@@ -13,25 +14,52 @@ import (
 
 
 func DownloadInstall(pkginfo string) {
-    pkgCmd := strings.Split(pkginfo, "%")[0]
-    pkgGhPath := strings.Split(pkginfo, "%")[1]
-    pkgInsCmds := strings.Split(pkginfo, "%")[2]
 
-    // if github owner and repo is none
-    if pkgGhPath == "none" {
+    rePkgFmt1 := regexp.MustCompile(
+        `^\s*([\w_/]+)\s*\(?@\)?\s*([\w-_/]+)\s*\(?!\)?\s*(.*)$`)
+
+    rePkgFmt2 := regexp.MustCompile(
+        `^\s*([\w_/]+)\s*\(?!\)?\s*(.*)$`)
+
+    pkgInfoArr := rePkgFmt1.FindStringSubmatch(pkginfo)
+
+    if pkgInfoArr == nil {
+        pkgInfoArr = rePkgFmt2.FindStringSubmatch(pkginfo)
+        if pkgInfoArr == nil {
+            fmt.Println("No valid info for", pkginfo)
+            return
+        }
+    }
+
+    pkgName := pkgInfoArr[1]
+    pkgGhPath := ""
+    pkgInsCmds := pkgInfoArr[2]
+    if len(pkgInfoArr) == 4 {
+        pkgGhPath = pkgInfoArr[2]
+        pkgInsCmds = pkgInfoArr[3]
+    }
+
+    fmt.Println(pkgName, pkgGhPath, pkgInsCmds)
+
+    if pkgGhPath == "" {
         fmt.Printf("runing %s ...", pkgInsCmds)
         gpm.ShellRun(pkgInsCmds)
     } else {
         ownerRepo := strings.Split(pkgGhPath, "/")
 
-        oldVersion, err := exec.Command(pkgCmd, "--version").Output()
+        oldVersion, err := exec.Command(pkgName, "--version").Output()
         if err != nil {
             fmt.Println(err)
             // just download it
             oldVersion = []byte("0.0.0")
         }
 
-        pkgPath, err := gpm.DownloadLatestRelease(ownerRepo[0], ownerRepo[1], string(oldVersion[:]))
+        pkgType := "deb"
+        if strings.Contains(pkgInsCmds, "tar") {
+            pkgType = "tar"
+        }
+        pkgPath, err := gpm.DownloadLatestRelease(
+            ownerRepo[0], ownerRepo[1], string(oldVersion[:]), pkgType)
         if err != nil {
             fmt.Println(err)
             return
@@ -61,14 +89,17 @@ func main() {
         home := os.Getenv("HOME")
         pkgListFile := filepath.Join(home, ".packages")
         file, err := os.Open(pkgListFile)
+        defer file.Close()
         if err != nil {
             log.Fatal(err)
         }
-        defer file.Close()
 
         scanner := bufio.NewScanner(file)
         for scanner.Scan() {
-            if scanner.Text() == "" || scanner.Text()[0] == '#' {
+            reBlank := regexp.MustCompile(`^\s*$`)
+            reComment := regexp.MustCompile(`^\s*#+.*`)
+            if reBlank.MatchString(scanner.Text()) ||
+                reComment.MatchString(scanner.Text()) {
                 continue
             }
             DownloadInstall(scanner.Text())

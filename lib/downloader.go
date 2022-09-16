@@ -11,6 +11,7 @@ import (
     "net/http"
     "path/filepath"
     "github.com/google/go-github/v33/github"
+    "github.com/elastic/go-sysinfo"
 )
 
 // DownloadFile will download a url to a local file. It's efficient because it will
@@ -77,7 +78,7 @@ func DownloadLatestTag(owner, repo, oldVersion string) error {
     return nil
 }
 
-func DownloadLatestRelease(owner, repo, oldVersion string) (pkg string, err error) {
+func DownloadLatestRelease(owner, repo, oldVersion, pkgType string) (pkg string, err error) {
     var input string
 
     client := github.NewClient(nil)
@@ -98,18 +99,52 @@ func DownloadLatestRelease(owner, repo, oldVersion string) (pkg string, err erro
         return "", nil
     }
 
-    for i, asset :=range release.Assets {
-        fmt.Printf("[%02d] %s\n", i, *asset.Name)
-    }
-    fmt.Printf("Select your package: ")
-    fmt.Scanln(&input)
-    number, err := strconv.Atoi(input)
+    host, _ := sysinfo.Host()
+    // fmt.Println(host.Info().Architecture, host.Info().OS.Name)
+    pkgFilter := make(map[string]int)
 
-    if err != nil {
-        return "", err
+    for i, asset := range release.Assets {
+        if strings.Contains(*asset.Name, pkgType) {
+            if strings.Contains(host.Info().Architecture, "x86_64") {
+                if strings.Contains(*asset.Name, "amd64") || 
+                    strings.Contains(*asset.Name, "x86_64") {
+                    if strings.Contains(host.Info().OS.Name, "GNU") {
+                        if !strings.Contains(*asset.Name, "musl") {
+                            pkgFilter[*asset.Name] = i
+                        }
+                    }
+                }
+            } else {
+                if strings.Contains(*asset.Name, host.Info().Architecture) {
+                    if strings.Contains(host.Info().OS.Name, "GNU") {
+                        if !strings.Contains(*asset.Name, "musl") {
+                            pkgFilter[*asset.Name] = i
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    appreAsset := release.Assets[number]
+    selPkg := 0
+    for pn, i := range pkgFilter {
+        fmt.Printf("[%02d] %s\n", i, pn)
+        selPkg = i
+    }
+
+    if len(pkgFilter) > 1 {
+
+        fmt.Printf("Select your package: ")
+        fmt.Scanln(&input)
+        number, err := strconv.Atoi(input)
+
+        if err != nil {
+            return "", err
+        }
+        selPkg = number
+    }
+
+    appreAsset := release.Assets[selPkg]
     pkgPath := filepath.Join("/tmp", *appreAsset.Name)
 
     if _, err := os.Stat(pkgPath); err == nil {
