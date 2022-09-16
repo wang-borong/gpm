@@ -39,8 +39,6 @@ func DownloadInstall(pkginfo string) {
         pkgInsCmds = pkgInfoArr[3]
     }
 
-    fmt.Println(pkgName, pkgGhPath, pkgInsCmds)
-
     if pkgGhPath == "" {
         fmt.Printf("runing %s ...", pkgInsCmds)
         gpm.ShellRun(pkgInsCmds)
@@ -54,9 +52,13 @@ func DownloadInstall(pkginfo string) {
             oldVersion = []byte("0.0.0")
         }
 
-        pkgType := "deb"
+        pkgType := ""
         if strings.Contains(pkgInsCmds, "tar") {
             pkgType = "tar"
+        } else if strings.Contains(pkgInsCmds, "deb") {
+            pkgType = "deb"
+        } else {
+            pkgType = ""
         }
         pkgPath, err := gpm.DownloadLatestRelease(
             ownerRepo[0], ownerRepo[1], string(oldVersion[:]), pkgType)

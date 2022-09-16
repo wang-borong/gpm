@@ -112,6 +112,8 @@ func DownloadLatestRelease(owner, repo, oldVersion, pkgType string) (pkg string,
                         if !strings.Contains(*asset.Name, "musl") {
                             pkgFilter[*asset.Name] = i
                         }
+                    } else {
+                        pkgFilter[*asset.Name] = i
                     }
                 }
             } else {
@@ -120,6 +122,8 @@ func DownloadLatestRelease(owner, repo, oldVersion, pkgType string) (pkg string,
                         if !strings.Contains(*asset.Name, "musl") {
                             pkgFilter[*asset.Name] = i
                         }
+                    } else {
+                        pkgFilter[*asset.Name] = i
                     }
                 }
             }
